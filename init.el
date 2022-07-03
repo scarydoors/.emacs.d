@@ -149,6 +149,13 @@
 (use-package solaire-mode
   :hook (after-init . solaire-global-mode))
 
+(use-package dashboard
+  :demand t
+  :config
+  (setq dashboard-center-content t
+        dashboard-banner-logo-title "bowow")
+  (dashboard-setup-startup-hook))
+
 ;;; editing utilities
 
 (use-package expand-region
@@ -279,7 +286,7 @@
          "\\.jsx\\'")
   :config
   (setq js2-mode-show-parse-errors nil
-        js2-mode-show0strict-warnings nil
+        js2-mode-show-strict-warnings nil
         js2-basic-offset 2
         js-indent-level 2))
 
