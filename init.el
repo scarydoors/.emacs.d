@@ -151,6 +151,11 @@
 (use-package solaire-mode
   :hook (after-init . solaire-global-mode))
 
+(use-package highlight-indent-guides
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :config
+  (setq highlight-indent-guides-method 'bitmap))
+
 (use-package dashboard
   :demand t
   :config
