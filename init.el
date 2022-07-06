@@ -190,6 +190,11 @@
   (require 'smartparens-config)
   (smartparens-global-mode +1))
 
+;;; utilities
+
+(use-package magit
+  :defer 0.1)
+
 ;;; lsp
 
 (use-package lsp-mode
