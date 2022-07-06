@@ -48,6 +48,7 @@
 ;;; sane defaults for Emacs
 (use-package emacs
   :ensure nil
+  :hook ((prog-mode text-mode) . display-line-numbers-mode)
   :init
   (setq inhibit-startup-screen t
         initial-scratch-message nil
@@ -101,7 +102,6 @@
         scroll-conservatively 10000)
 
   ;; setup line numbers
-  (global-display-line-numbers-mode +1)
   (setq-default display-line-numbers-width 4)
 
   (column-number-mode +1))
@@ -118,9 +118,11 @@
   :demand t
   :config
   (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t)
+        doom-themes-enable-italic t
+        doom-themes-treemacs-theme "doom-colors")
   (load-theme 'doom-sourcerer t)
-  (doom-themes-org-config))
+  (doom-themes-org-config)
+  (doom-themes-treemacs-config))
 
 (set-face-attribute 'default nil
                     :family "Hack"
@@ -155,6 +157,20 @@
   (setq dashboard-center-content t
         dashboard-banner-logo-title "bowow")
   (dashboard-setup-startup-hook))
+
+(use-package treemacs
+  :bind (:map global-map
+              ("M-0" . treemacs-select-window)
+              ("C-x t 1" . treemacs-delete-other-windows)
+              ("C-x t t" . treemacs)
+              ("C-x t d" . treemacs-select-directory)
+              ("C-x t B" . treemacs-bookmark)
+              ("C-x t C-t" . treemacs-find-file)
+              ("C-x t M-t" . treemacs-find-tag))
+  :config
+  (treemacs-follow-mode +1)
+  (treemacs-filewatch-mode +1)
+  (treemacs-fringe-indicator-mode 'always))
 
 ;;; editing utilities
 
