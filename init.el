@@ -120,7 +120,7 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t
         doom-themes-treemacs-theme "doom-colors")
-  (load-theme 'doom-sourcerer t)
+  (load-theme 'doom-acario-dark t)
   (doom-themes-org-config)
   (doom-themes-treemacs-config))
 
@@ -189,6 +189,9 @@
   :config
   (require 'smartparens-config)
   (smartparens-global-mode +1))
+
+(use-package avy
+  :bind ("C-c SPC" . avy-goto-word-1))
 
 ;;; utilities
 
