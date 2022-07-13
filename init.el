@@ -345,5 +345,46 @@
   (setq css-indent-level 2)
   (setq css-indent-offset 2))
 
+;;; c/c++
+(use-package cc-mode
+  :ensure nil
+  :defer t
+  :config
+  (setq c-basic-offset 4
+        c-backspace-function #'delete-backward-char)
+
+  ;; TODO: Refine this style
+  (c-add-style
+   "scary" '((c-comment-only-line-offset . 0)
+             (c-hanging-braces-alist (brace-list-open)
+                                     (brace-entry-open)
+                                     (substatement-open after)
+                                     (block-close . c-snug-do-while)
+                                     (namespace-open after)
+                                     (extern-lang-open after))
+             (c-cleanup-list brace-else-brace
+                             brace-catch-brace)
+             (c-offsets-alist
+              (knr-argdecl-intro . 0)
+              (defun-close . 0)
+              (defun-open . 0)
+              (innamespace . 0)
+              (substatement-open . 0)
+              (substatement-label . 0)
+              (statement-cont . +)
+              (case-label . +)
+              (brace-list-entry . 0)
+              (brace-list-intro . +)
+              (brace-list-close . 0)
+              (arglist-intro . +)
+              (arglist-close . 0)
+              (inline-open . 0)
+              (inlambda . 0)
+              (access-label . -)
+              (inclass . +)
+              (label . 0))))
+
+    (when (listp c-default-style)
+    (setf (alist-get 'other c-default-style) "scary")))
 
 ;;; init.el ends here
