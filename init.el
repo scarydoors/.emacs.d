@@ -26,7 +26,6 @@
 ;;; Code:
 
 ;;; straight.el setup
-
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -120,7 +119,7 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t
         doom-themes-treemacs-theme "doom-colors")
-  (load-theme 'doom-acario-dark t)
+  (load-theme 'doom-sourcerer t)
   (doom-themes-org-config)
   (doom-themes-treemacs-config))
 
@@ -185,17 +184,31 @@
 
 (use-package smartparens
   :defer 0.1
-  :bind ("M-k" . sp-forward-sexp)
+  :bind ("M-n" . sp-forward-sexp)
   :config
   (require 'smartparens-config)
+
+  (defun indent-between-pair (&rest _ignored)
+    (newline)
+    (indent-according-to-mode)
+    (forward-line -1)
+    (indent-according-to-mode))
+
+  (sp-local-pair 'prog-mode "{" nil :post-handlers '((indent-between-pair "RET")))
+  (sp-local-pair 'prog-mode "[" nil :post-handlers '((indent-between-pair "RET")))
+  (sp-local-pair 'prog-mode "(" nil :post-handlers '((indent-between-pair "RET")))
+  
   (smartparens-global-mode +1))
 
-(use-package avy
-  :bind ("C-c SPC" . avy-goto-word-1))
+(use-package avy)
+
 
 ;;; utilities
 
 (use-package magit
+  :defer 0.1)
+
+(use-package hydra
   :defer 0.1)
 
 ;;; lsp
@@ -205,10 +218,11 @@
   (setq read-process-output-max (* 1024 1024))
   (setq lsp-keymap-prefix "C-c l"
         lsp-idle-delay 0.1)
-
   (setq-default lsp-lens-enable nil)
   :hook (((c++-mode c-mode rust-mode js-mode web-mode css-mode) . lsp-deferred)
          (lsp-mode . lsp-enable-which-key-integration))
+  :config
+  (unbind-key "M-n" lsp-signature-mode-map)
   :commands lsp lsp-deferred)
 
 (use-package company
