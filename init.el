@@ -225,15 +225,16 @@
   (unbind-key "M-n" lsp-signature-mode-map)
   :commands lsp lsp-deferred)
 
-(use-package company
-  :hook (prog-mode . company-mode)
+(use-package corfu
+  :demand t
+  :init
+  (setq corfu-auto t
+        corfu-auto-delay 0
+        corfu-auto-prefix 0
+        corfu-quit-no-match 'seperator)
+  (setq tab-always-indent 'complete)
   :config
-  (setq company-idle-delay 0.0
-        company-minimum-prefix-length 1)
-  (defadvice company-in-string-or-comment (around company-in-string-or-comment-hack activate)
-    (if (memq major-mode '(php-mode html-mode nxml-mode))
-        (setq ad-return-value nil)
-      ad-do-it)))
+  (global-corfu-mode))
 
 (use-package yasnippet
   :defer 0.1
