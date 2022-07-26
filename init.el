@@ -55,6 +55,8 @@
         sentence-end-double-space nil
         use-dialog-box nil
         use-short-answers t)
+
+  (setq load-prefer-newer t)
   
   ;; split vertically by default 
   (setq split-width-threshold 160
@@ -251,6 +253,30 @@
   (setq tab-always-indent 'complete)
   :config
   (global-corfu-mode))
+
+(use-package cape
+  :demand t
+  :after corfu
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-file))
+
+(use-package corfu-doc
+  :hook (corfu-mode . corfu-doc-mode)
+  :bind
+  (
+   :map corfu-map
+        ("M-p" . corfu-doc-scroll-down)
+        ("M-n" . corfu-doc-scroll-up)
+        ("M-d" . corfu-doc-toggle)
+   ))
+
+(use-package kind-icon
+  :demand t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package yasnippet
   :defer 0.1
