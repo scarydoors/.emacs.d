@@ -176,6 +176,11 @@
   (treemacs-filewatch-mode +1)
   (treemacs-fringe-indicator-mode 'always))
 
+(use-package dirvish
+  :defer 0.1
+  :config
+  (dirvish-override-dired-mode +1))
+
 ;;; editing utilities
 
 (use-package expand-region
@@ -200,8 +205,18 @@
   
   (smartparens-global-mode +1))
 
-(use-package avy)
+(use-package avy
+  :config
+  (avy-setup-default)
+  (global-set-key (kbd "C-c C-j") 'avy-resume)
+  :bind
+  (("M-g w" . avy-goto-word-1)
+   ("M-g g" . avy-goto-line)
+   ("C-'" . avy-goto-char-2)
+   ("C-c C-'" . avy-pop-mark)))
 
+(use-package ace-window
+  :bind ("M-o" . ace-window))
 
 ;;; utilities
 
@@ -219,6 +234,7 @@
   (setq lsp-keymap-prefix "C-c l"
         lsp-idle-delay 0.1)
   (setq-default lsp-lens-enable nil)
+  (setq lsp-completion-provider :none)
   :hook (((c++-mode c-mode rust-mode js-mode web-mode css-mode) . lsp-deferred)
          (lsp-mode . lsp-enable-which-key-integration))
   :config
@@ -230,8 +246,8 @@
   :init
   (setq corfu-auto t
         corfu-auto-delay 0
-        corfu-auto-prefix 0
-        corfu-quit-no-match 'seperator)
+        corfu-auto-prefix 1
+        corfu-quit-no-match 'separator)
   (setq tab-always-indent 'complete)
   :config
   (global-corfu-mode))
@@ -278,7 +294,6 @@
          ;; M-g bindings (goto-map)
          ("M-g e" . consult-compile-error)
          ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
          ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
          ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
          ("M-g m" . consult-mark)
@@ -315,7 +330,6 @@
   :bind (:map minibuffer-local-completion-map
               ("M-A" . marginalia-cycle)
               ("C-i" . marginalia-cycle-annotators)))
-
 
 ;;; rust
 (use-package rustic)
