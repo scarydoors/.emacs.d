@@ -457,4 +457,6 @@
     (when (listp c-default-style)
       (setf (alist-get 'other c-default-style) "scary")))
 
+(org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
+
 ;;; init.el ends here
