@@ -121,9 +121,10 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t
         doom-themes-treemacs-theme "doom-colors")
-  (load-theme 'doom-sourcerer t)
+  (load-theme 'doom-tomorrow-night t)
   (doom-themes-org-config)
   (doom-themes-treemacs-config))
+
 
 (set-face-attribute 'default nil
                     :family "Hack"
@@ -183,6 +184,11 @@
   :config
   (dirvish-override-dired-mode +1))
 
+(use-package anzu
+  :defer 0.1
+  :config
+  (global-anzu-mode +1))
+
 ;;; editing utilities
 
 (use-package expand-region
@@ -218,7 +224,8 @@
    ("C-c C-'" . avy-pop-mark)))
 
 (use-package ace-window
-  :bind ("M-o" . ace-window))
+  :defer 0.1)
+
 
 ;;; utilities
 (use-package exec-path-from-shell
@@ -230,9 +237,49 @@
 (use-package magit
   :defer 0.1)
 
+
+;;; hydras
+
 (use-package hydra
   :defer 0.1)
 
+(use-package windsize
+  :defer 0.1)
+
+(defhydra sd-hydra-window (:hint nil)
+  "
+Movement    ^Resize^     ^Split^          ^Other^
+------------------------------------------------------------------
+_h_ left      _C-h_ left   _o_ horizontal   _d_   delete window
+_j_ down      _C-j_ down   _v_ vertical     _1_   only this window
+_k_ up        _C-k_ up     _m_ maximize     _M-o_ ace-window
+_l_ right     _C-l_ right  _b_ balance      _q_   quit
+"
+  ;; Movement
+  ("h" windmove-left)
+  ("j" windmove-down)
+  ("k" windmove-up)
+  ("l" windmove-right)
+
+  ;; Resize
+  ("C-h" windsize-left)
+  ("C-j" windsize-down)
+  ("C-k" windsize-up)
+  ("C-l" windsize-right)
+
+  ;; Split
+  ("o" split-window-below)
+  ("v" split-window-right)
+  ("m" maximize-window)
+  ("b" balance-windows)
+
+  ;; Other
+  ("d" delete-window)
+  ("1" delete-other-windows)
+  ("M-o" ace-window)
+  ("q" nil))
+
+(global-set-key (kbd "M-o") #'sd-hydra-window/body)
 ;;; lsp
 
 (use-package lsp-mode
