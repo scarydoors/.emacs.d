@@ -127,11 +127,11 @@
 
 (set-face-attribute 'default nil
                     :family "Hack"
-                    :height 120)
+                    :height 150)
 (set-face-attribute 'variable-pitch nil
                     :family "IBM Plex Sans"
                     :weight 'normal
-                    :height 120)
+                    :height 150)
 (set-face-attribute 'mode-line nil :inherit 'variable-pitch)
 (set-face-attribute 'mode-line-inactive nil :inherit 'variable-pitch)
 
@@ -221,6 +221,11 @@
   :bind ("M-o" . ace-window))
 
 ;;; utilities
+(use-package exec-path-from-shell
+  :demand t
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
 
 (use-package magit
   :defer 0.1)
@@ -443,6 +448,6 @@
               (label . 0))))
 
     (when (listp c-default-style)
-    (setf (alist-get 'other c-default-style) "scary")))
+      (setf (alist-get 'other c-default-style) "scary")))
 
 ;;; init.el ends here
