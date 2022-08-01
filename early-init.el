@@ -50,12 +50,12 @@
 
 (add-hook 'emacs-startup-hook #'window-divider-mode)
 
-
-
 (add-hook 'window-setup-hook
           (lambda ()
             (setq-default inhibit-redisplay nil
                           inhibit-message nil))
           (redisplay))
+
+(setq native-comp-async-report-warnings-errors 'silent)
 
 ;;; early-init.el ends here
