@@ -292,6 +292,8 @@ _l_ right     _C-l_ right  _b_ balance      _q_   quit
   :hook (((c++-mode c-mode rust-mode js-mode web-mode css-mode) . lsp-deferred)
          (lsp-mode . lsp-enable-which-key-integration))
   :config
+  (add-to-list 'lsp-language-id-configuration
+               '(web-mode . "html"))
   (unbind-key "M-n" lsp-signature-mode-map)
   :commands lsp lsp-deferred)
 
@@ -303,6 +305,10 @@ _l_ right     _C-l_ right  _b_ balance      _q_   quit
         corfu-auto-prefix 1
         corfu-quit-no-match 'separator)
   (setq tab-always-indent 'complete)
+
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (setq-local corfu-auto nil)))
   :config
   (global-corfu-mode))
 
@@ -440,7 +446,8 @@ _l_ right     _C-l_ right  _b_ balance      _q_   quit
   ("\\.mustache\\'" . web-mode)       
   ("\\.djhtml\\'" . web-mode)         
   ("\\.jst.ejs\\'" . web-mode)        
-  ("\\.html?\\'" . web-mode))
+  ("\\.html?\\'" . web-mode)
+  ("\\.hbs\\'" . web-mode))
 
   :init
   (setq web-mode-enable-block-face t)
