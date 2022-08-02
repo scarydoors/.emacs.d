@@ -240,46 +240,6 @@
 
 ;;; hydras
 
-(use-package hydra
-  :defer 0.1)
-
-(use-package windsize
-  :defer 0.1)
-
-(defhydra sd-hydra-window (:hint nil)
-  "
-Movement    ^Resize^     ^Split^          ^Other^
-------------------------------------------------------------------
-_h_ left      _C-h_ left   _o_ horizontal   _d_   delete window
-_j_ down      _C-j_ down   _v_ vertical     _1_   only this window
-_k_ up        _C-k_ up     _m_ maximize     _M-o_ ace-window
-_l_ right     _C-l_ right  _b_ balance      _q_   quit
-"
-  ;; Movement
-  ("h" windmove-left)
-  ("j" windmove-down)
-  ("k" windmove-up)
-  ("l" windmove-right)
-
-  ;; Resize
-  ("C-h" windsize-left)
-  ("C-j" windsize-down)
-  ("C-k" windsize-up)
-  ("C-l" windsize-right)
-
-  ;; Split
-  ("o" split-window-below)
-  ("v" split-window-right)
-  ("m" maximize-window)
-  ("b" balance-windows)
-
-  ;; Other
-  ("d" delete-window)
-  ("1" delete-other-windows)
-  ("M-o" ace-window)
-  ("q" nil))
-
-(global-set-key (kbd "M-o") #'sd-hydra-window/body)
 ;;; lsp
 
 (use-package lsp-mode
@@ -503,5 +463,7 @@ _l_ right     _C-l_ right  _b_ balance      _q_   quit
 
     (when (listp c-default-style)
       (setf (alist-get 'other c-default-style) "scary")))
+
+(org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
 
 ;;; init.el ends here
