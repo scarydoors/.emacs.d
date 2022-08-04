@@ -40,6 +40,8 @@
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
 
+(push '(fullscreen . fullboth) initial-frame-alist)
+
 (setq menu-bar-mode nil
       tool-bar-mode nil
       scroll-bar-mode nil)
