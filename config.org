@@ -24,13 +24,13 @@
   (setq use-package-always-defer t)
   (setq use-package-always-ensure t)
 #+end_src
-
 * General Configuration
 ** Better Defaults
 #+begin_src emacs-lisp
   (use-package emacs
     :ensure nil
-    :hook ((prog-mode text-mode) . display-line-numbers-mode)
+    :hook ((prog-mode . display-line-numbers-mode)
+           (prog-mode . display-fill-column-indicator-mode))
     :init
     (setq inhibit-startup-screen t
           initial-scratch-message nil
@@ -40,7 +40,7 @@
           use-short-answers t)
 
     (setq load-prefer-newer t)
-  
+
     ;; split vertically by default 
     (setq split-width-threshold 100
           split-height-threshold nil)
@@ -59,6 +59,8 @@
     (prefer-coding-system 'utf-8)
     (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 
+    (setq require-final-newline nil)
+
     (delete-selection-mode +1)
 
     (recentf-mode +1)
@@ -75,10 +77,9 @@
 
     (setq-default indent-tabs-mode nil)
     (setq-default truncate-lines 1)
-  
+
     (setq-default fill-column 80)
-    (global-display-fill-column-indicator-mode +1)
-  
+
     ;; better scrolling
     (setq scroll-preserve-screen-position 1
           scroll-step 1
@@ -89,6 +90,7 @@
     (setq-default display-line-numbers-width 4)
 
     (column-number-mode +1))
+
 #+end_src
 ** System
 *** Ensure Emacs path variable is same as shell
@@ -123,11 +125,11 @@
 #+begin_src emacs-lisp
   (set-face-attribute 'default nil
                       :family "Hack"
-                      :height 150)
+                      :height 160)
   (set-face-attribute 'variable-pitch nil
                       :family "Source Sans Pro"
                       :weight 'normal
-                      :height 150)
+                      :height 160)
   (set-face-attribute 'mode-line nil :inherit 'variable-pitch)
   (set-face-attribute 'mode-line-inactive nil :inherit 'variable-pitch)
 #+end_src
@@ -384,7 +386,7 @@
     (kind-icon-default-face 'corfu-default)
     :config
     (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-  #+end_src
+#+end_src
 * Editing Packages
 ** =expand-region=
 #+begin_src emacs-lisp
@@ -476,7 +478,7 @@
           js2-basic-offset 2
           js-indent-level 2))
 #+end_src
-*** Ensure node_modules path is added to exec-path
+*** Ensure node modules path is added to exec-path
 #+begin_src emacs-lisp
   (use-package add-node-modules-path
     :hook (((js2-mode rjsx-mode) . add-node-modules-path)))
@@ -552,30 +554,35 @@
     (when (listp c-default-style)
       (setf (alist-get 'other c-default-style) "scary")))
 #+end_src
-** Ember
-*** Ember Mode
+* Org
 #+begin_src emacs-lisp
-  (use-package ember-mode
-    :custom
-    (ember-completion-system :default)
+  (use-package org
+    :straight (org :host github
+                   :repo "emacs-straight/org-mode"
+                   :branch "main")
+    :mode ("\\.org\\'" . org-mode)
+    :demand t
     :config
-    (setq ember-keymap-prefix "C-c ."))
+    (setq org-hide-emphasis-markers t
+        org-startup-indented t
+        org-src-tab-acts-natively t
+        org-pretty-entities t
+        org-fontify-whole-heading-line t
+        org-fontify-done-headline t
+        org-fontify-quote-and-verse-blocks t))
 #+end_src
-
-*** Ember LSP Integration
-#+begin_src emacs-lisp :tangle no
-  (with-eval-after-load 'lsp-mode
-    (add-to-list 'lsp-language-id-configuration
-                 '(ember-mode . "ember"))
-
-    (lsp-register-client
-     (make-lsp-client :new-connection (lsp-stdio-connection "ember-language-server")
-                      :activation-fn (lsp-activate-on "ember")
-                      :server-id 'ember-ls
-                      :priority -1
-                      :add-on? t)))
-
-
+** Org Superstar
+#+begin_src emacs-lisp
+  (use-package org-superstar
+    :hook (org-mode . org-superstar-mode))
+#+end_src
+** Mixed Pitches in Org Mode
+#+begin_src emacs-lisp
+  (use-package mixed-pitch
+    :hook (org-mode . mixed-pitch-mode)
+    :config
+    (setq mixed-pitch-fixed-pitch-faces
+          '(org-block org-block-begin-line org-block-end-line org-code org-document-info-keyword org-meta-line org-table org-verbatim)))
 
 #+end_src
 
