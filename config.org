@@ -1,28 +1,36 @@
 #+TITLE: scarydoors' Emacs Configuration
-
+#+PROPERTY: header-args :tangle yes
 * Package Management
-** =straight.el=
-#+begin_src emacs-lisp
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 5))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
-#+end_src
-
 ** =use-package=
 #+begin_src emacs-lisp
   (straight-use-package 'use-package)
   (setq straight-use-package-by-default t)
   (setq use-package-always-defer t)
   (setq use-package-always-ensure t)
+#+end_src
+* Org
+#+begin_src emacs-lisp
+  (setq org-hide-emphasis-markers t
+        org-startup-indented t
+        org-src-tab-acts-natively t
+        org-pretty-entities t
+        org-fontify-whole-heading-line t
+        org-fontify-done-headline t
+        org-fontify-quote-and-verse-blocks t)
+#+end_src
+** Org Superstar
+#+begin_src emacs-lisp
+  (use-package org-superstar
+    :hook (org-mode . org-superstar-mode))
+#+end_src
+** Mixed Pitches in Org Mode
+#+begin_src emacs-lisp
+  (use-package mixed-pitch
+    :hook (org-mode . mixed-pitch-mode)
+    :config
+    (setq mixed-pitch-fixed-pitch-faces
+          '(org-block org-block-begin-line org-block-end-line org-code org-document-info-keyword org-meta-line org-table org-verbatim)))
+
 #+end_src
 * General Configuration
 ** Better Defaults
@@ -227,8 +235,8 @@
 *** Consult Integration
 #+begin_src emacs-lisp
   (use-package consult-projectile
-    :after consult
-    :bind ("C-c p f" . consult-projectile))
+    :demand t
+    :bind ("C-c c p" . consult-projectile))
 #+end_src
 ** Completion Frameworks
 *** Selectrum
@@ -248,7 +256,8 @@
     :init (selectrum-prescient-mode +1)
     :after selectrum)
 #+end_src
-*** Consult
+***
+Consult
 #+begin_src emacs-lisp
   (use-package consult
     :bind (;; C-c bindings (mode-specific-map)
@@ -301,7 +310,8 @@
            ("M-s" . consult-history)                  ;; orig. next-matching-history-element
            ("M-r" . consult-history))                 ;; orig. previous-matching-history-element
     :config
-    (setq register-preview-delay 0))
+    (setq register-preview-delay 0)
+    (setq consult-narrow-key "@"))
 #+end_src
 *** Marginalia
 #+begin_src emacs-lisp
@@ -423,8 +433,15 @@
     :bind
     (("M-g w" . avy-goto-word-1)
      ("M-g g" . avy-goto-line)
-     ("C-'" . avy-goto-char-2)
+     ("M-g C" . avy-goto-char-2)
      ("C-c C-'" . avy-pop-mark)))
+#+end_src
+** =hungry-delete=
+#+begin_src emacs-lisp
+  (use-package hungry-delete
+    :init
+    (setq hungry-delete-join-reluctantly t)
+    :bind ("M-DEL" . global-hungry-delete-mode))
 #+end_src
 ** Yasnippet
 #+begin_src emacs-lisp
@@ -457,6 +474,11 @@
 
     (unbind-key "M-n" lsp-signature-mode-map)
     :commands lsp lsp-deferred)
+#+end_src
+*** 
+** JSON
+#+begin_src emacs-lisp
+  (use-package json-mode)
 #+end_src
 ** Rust
 #+begin_src emacs-lisp
@@ -553,37 +575,6 @@
 
     (when (listp c-default-style)
       (setf (alist-get 'other c-default-style) "scary")))
-#+end_src
-* Org
-#+begin_src emacs-lisp
-  (use-package org
-    :straight (org :host github
-                   :repo "emacs-straight/org-mode"
-                   :branch "main")
-    :mode ("\\.org\\'" . org-mode)
-    :demand t
-    :config
-    (setq org-hide-emphasis-markers t
-        org-startup-indented t
-        org-src-tab-acts-natively t
-        org-pretty-entities t
-        org-fontify-whole-heading-line t
-        org-fontify-done-headline t
-        org-fontify-quote-and-verse-blocks t))
-#+end_src
-** Org Superstar
-#+begin_src emacs-lisp
-  (use-package org-superstar
-    :hook (org-mode . org-superstar-mode))
-#+end_src
-** Mixed Pitches in Org Mode
-#+begin_src emacs-lisp
-  (use-package mixed-pitch
-    :hook (org-mode . mixed-pitch-mode)
-    :config
-    (setq mixed-pitch-fixed-pitch-faces
-          '(org-block org-block-begin-line org-block-end-line org-code org-document-info-keyword org-meta-line org-table org-verbatim)))
-
 #+end_src
 
 * Hydras
