@@ -142,12 +142,21 @@
   (set-face-attribute 'mode-line-inactive nil :inherit 'variable-pitch)
 #+end_src
 *** Modeline
+**** Indicators
+#+begin_src emacs-lisp
+  (display-battery-mode +1)
+  (display-time-mode +1)
+#+end_src
 **** =doom-modeline=
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :hook (after-init . doom-modeline-mode)
     :config
-    (setq doom-modeline-height 40))
+    (setq doom-modeline-height 40
+          doom-modeline-mu4e t
+          doom-modeline-time-icon nil
+          doom-modeline-window-width-limit nil
+          all-the-icons-scale-factor 1.1))
 #+end_src
 **** =anzu=
 #+begin_src emacs-lisp
@@ -177,7 +186,9 @@
 *** =ace-window=
 #+begin_src emacs-lisp
   (use-package ace-window
-    :defer 0.1)
+    :defer 0.1
+    :config
+    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 #+end_src
 *** Indent Guides
 #+begin_src emacs-lisp
@@ -236,7 +247,7 @@
 #+begin_src emacs-lisp
   (use-package consult-projectile
     :demand t
-    :bind ("C-c c p" . consult-projectile))
+    :bind ("C-<tab>" . consult-projectile))
 #+end_src
 ** Completion Frameworks
 *** Selectrum
@@ -256,8 +267,7 @@
     :init (selectrum-prescient-mode +1)
     :after selectrum)
 #+end_src
-***
-Consult
+*** Consult
 #+begin_src emacs-lisp
   (use-package consult
     :bind (;; C-c bindings (mode-specific-map)
@@ -397,6 +407,44 @@ Consult
     :config
     (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 #+end_src
+** Email
+#+begin_src emacs-lisp
+  (use-package mu4e
+    :straight nil
+    :defer 0.2
+    :load-path "/usr/local/share/emacs/site-lisp/mu/mu4e/"
+    :init
+    (require 'smtpmail)
+    (setq mu4e-mu-binary (executable-find "mu")
+          mu4e-maildir "~/.maildir"
+          mu4e-get-mail-command (concat (executable-find "mbsync") " -a")
+          mu4e-update-interval 300
+          mu4e-attachment-dir "~/Desktop"
+          mu4e-change-filenames-when-moving t
+          mu4e-user-mail-address-list '("alan.strauhs@wearesauce.io")))
+
+  (use-package mu4e-alert
+    :hook (after-init . (mu4e-alert-enable-mode-line-display mu4e-alert-enable-notifications))
+    :after mu4e
+    :init
+    (defun perso--mu4e-notif ()
+      "Display both mode line and desktop alerts for incoming new emails."
+      (interactive)
+      (mu4e-update-mail-and-index 1)        ; getting new emails is ran in the background
+      (mu4e-alert-enable-mode-line-display) ; display new emails in mode-line
+      (mu4e-alert-enable-notifications))    ; enable desktop notifications for new emails
+    (defun perso--mu4e-refresh ()
+      "Refresh emails every 300 seconds and display desktop alerts."
+      (interactive)
+      (mu4e t)                            ; start silently mu4e mandatory for mu>=1.3.8
+      (run-with-timer 0 300 'perso--mu4e-notif))
+    :bind ("<f2>" . perso--mu4e-refresh)
+    :config
+    (mu4e-alert-set-default-style 'notifier)
+    (setq mu4e-alert-interesting-mail-query "flag:unread AND NOT flag:trashed"))
+
+
+#+end_src
 * Editing Packages
 ** =expand-region=
 #+begin_src emacs-lisp
@@ -433,7 +481,7 @@ Consult
     :bind
     (("M-g w" . avy-goto-word-1)
      ("M-g g" . avy-goto-line)
-     ("M-g C" . avy-goto-char-2)
+     ("M-g c" . avy-goto-char-2)
      ("C-c C-'" . avy-pop-mark)))
 #+end_src
 ** =hungry-delete=
