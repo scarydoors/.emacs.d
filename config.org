@@ -38,7 +38,8 @@
   (use-package emacs
     :ensure nil
     :hook ((prog-mode . display-line-numbers-mode)
-           (prog-mode . display-fill-column-indicator-mode))
+           (prog-mode . display-fill-column-indicator-mode)
+           (prog-mode . subword-mode))
     :init
     (setq inhibit-startup-screen t
           initial-scratch-message nil
@@ -73,7 +74,7 @@
 
     (recentf-mode +1)
 
-    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+    (global-set-key (kbd "<escape>") 'keyboard-quit)
 
     (setq make-backup-files nil
           auto-save-default nil
@@ -97,7 +98,9 @@
     ;; setup line numbers
     (setq-default display-line-numbers-width 4)
 
-    (column-number-mode +1))
+    (column-number-mode +1)
+
+    (setq initial-major-mode 'org-mode))
 
 #+end_src
 ** System
@@ -125,9 +128,31 @@
     (setq doom-themes-enable-bold t
           doom-themes-enable-italic t
           doom-themes-treemacs-theme "doom-colors")
-    (load-theme 'doom-tomorrow-night t)
     (doom-themes-org-config)
     (doom-themes-treemacs-config))
+#+end_src
+
+#+begin_src emacs-lisp
+  (setq modus-themes-italic-constructs t
+        modus-themes-bold-constructs t
+        modus-themes-region '(bg-only no-extend)
+        modus-themes-mode-line '(borderless))
+
+  ;; (load-theme 'modus-operandi)
+
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package ef-themes
+    :demand t
+    :config
+    (load-theme 'ef-duo-light))
+#+end_src
+*** Tab Bar
+#+begin_src emacs-lisp :tangle no
+  (use-package centaur-tabs
+    :demand t
+    :config (centaur-tabs-mode +1))
 #+end_src
 *** Fonts
 #+begin_src emacs-lisp
@@ -138,8 +163,16 @@
                       :family "Source Sans Pro"
                       :weight 'normal
                       :height 160)
-  (set-face-attribute 'mode-line nil :inherit 'variable-pitch)
-  (set-face-attribute 'mode-line-inactive nil :inherit 'variable-pitch)
+  (defvar after-load-theme-hook nil)
+  (defadvice load-theme (after run-after-load-theme-hook activate)
+    (run-hooks 'after-load-theme-hook))
+
+  (defun mode-bar-variable-pitch ()
+    (set-face-attribute 'mode-line nil :inherit 'variable-pitch)
+    (set-face-attribute 'mode-line-inactive nil :inherit 'variable-pitch))
+  (mode-bar-variable-pitch)
+
+  (add-hook 'after-load-theme-hook #'mode-bar-variable-pitch)
 #+end_src
 *** Modeline
 **** Indicators
@@ -212,6 +245,12 @@
     (treemacs-follow-mode +1)
     (treemacs-filewatch-mode +1)
     (treemacs-fringe-indicator-mode 'always))
+
+  (use-package treemacs-all-the-icons
+    :after treemacs
+    :demand t
+    :config
+    (treemacs-load-theme "all-the-icons"))
 #+end_src
 ** Register
 #+begin_src emacs-lisp
@@ -250,22 +289,43 @@
     :bind ("C-<tab>" . consult-projectile))
 #+end_src
 ** Completion Frameworks
-*** Selectrum
+*** Vertico
 #+begin_src emacs-lisp
-  (use-package selectrum
+  (use-package vertico
+    :straight (vertico :files (:defaults "extensions/*")
+                       :includes (vertico-quick))
     :demand t
+    :bind (:map vertico-map
+                ("<escape>" . #'minibuffer-keyboard-quit))
     :config
-    (selectrum-mode +1))
-#+end_src
-**** Prescient
-#+begin_src emacs-lisp
-  (use-package prescient
-    :demand t
-    :config (prescient-persist-mode +1))
+    (setq vertico-count 13)
+    (vertico-mode +1)
 
-  (use-package selectrum-prescient
-    :init (selectrum-prescient-mode +1)
-    :after selectrum)
+    (require 'vertico-quick)
+
+    (define-key vertico-map "\M-q" #'vertico-quick-insert)
+    (define-key vertico-map "\C-q" #'vertico-quick-exit))
+
+  (use-package emacs
+    :init
+    (defun crm-indicator (args)
+      (cons (format "[CRM%s] %s"
+                    (replace-regexp-in-string
+                     "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                     crm-separator)
+                    (car args))
+            (cdr args)))
+    (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+
+    (setq enable-recursive-minibuffers t))
+#+end_src
+**** Orderless
+#+begin_src emacs-lisp
+  (use-package orderless
+    :custom
+    (completion-styles '(orderless substring basic))
+    (completion-category-defaults nil)
+    (completion-category-overrides '((file (styles partial-completion)))))
 #+end_src
 *** Consult
 #+begin_src emacs-lisp
@@ -323,6 +383,14 @@
     (setq register-preview-delay 0)
     (setq consult-narrow-key "@"))
 #+end_src
+****  =consult-dir=
+#+begin_src emacs-lisp
+  (use-package consult-dir
+    :bind (("C-x C-d" . consult-dir)
+           :map minibuffer-local-completion-map
+           ("C-x C-d" . consult-dir)
+           ("C-x C-j" . consult-dir-jump-file)))
+#+end_src
 *** Marginalia
 #+begin_src emacs-lisp
   (use-package marginalia
@@ -332,6 +400,12 @@
     :bind (:map minibuffer-local-completion-map
                 ("M-A" . marginalia-cycle)
                 ("C-i" . marginalia-cycle-annotators)))
+
+  (use-package all-the-icons-completion
+    :after (marginalia all-the-icons)
+    :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+    :init
+    (all-the-icons-completion-mode))
 #+end_src
 *** Embark
 #+begin_src emacs-lisp
@@ -445,6 +519,69 @@
 
 
 #+end_src
+** Workspaces
+#+begin_src emacs-lisp :tangle no
+  (use-package bufler
+    :hook (after-init . bufler-mode)
+    :bind ("C-x C-b" . bufler))
+
+
+  (defun my--source ()
+                (let* ((bufler-vc-state nil)
+                       (group-path (unless current-prefix-arg
+                                     (frame-parameter nil 'bufler-workspace-path))))
+                  (pcase current-prefix-arg
+                    ((or `nil '(4) '(16))
+                     (bufler-buffer-alist-at
+                      group-path :filter-fns bufler-workspace-switch-buffer-filter-fns))
+                    (_ (bufler-buffer-alist-at nil)))))
+
+
+  (defvar bufler-consult-source
+    (list :name "Bufler"
+          :narrow ?s
+          :category 'buffer
+          :state #'consult--buffer-state
+          :history 'buffer-name-history
+          :default t
+          :items
+          #'(lambda ()
+              (mapcar #'(lambda (item) (buffer-name (cdr item))) (my--source)))))
+
+  (add-to-list 'consult-buffer-sources bufler-consult-source)
+#+end_src
+** Emacs as a Terminal Multiplexer
+#+begin_src emacs-lisp
+  (use-package vterm)
+
+
+  (use-package multi-vterm
+    :demand t
+    :bind (("C-c t t" . multi-vterm)
+           ("C-c t r" . multi-vterm-rename-buffer)
+           ("C-c t n" . multi-vterm-next)
+           ("C-c t p" . multi-vterm-prev)
+           ("C-c t x" . multi-vterm-project))
+    :config
+    (defun my/multi-vterm-buffer-names ()
+      (mapcar #'buffer-name multi-vterm-buffer-list))
+
+    (setq multi-vterm-buffer-source
+      (list :name "Terminals"
+            :category 'buffer
+            :state #'consult--buffer-state
+            :history 'buffer-name-history
+            :items #'(lambda ()
+                     (my/multi-vterm-buffer-names))))
+    (defun my/multi-vterm-switch-buffer ()
+      (interactive)
+      (consult-buffer (list multi-vterm-buffer-source)))
+
+    (bind-key (kbd "C-c t s") #'my/multi-vterm-switch-buffer))
+
+
+
+#+end_src
 * Editing Packages
 ** =expand-region=
 #+begin_src emacs-lisp
@@ -508,19 +645,18 @@
           lsp-idle-delay 0.1)
     (setq-default lsp-lens-enable nil)
     (setq lsp-completion-provider :none)
+    (defun my/lsp-mode-setup-completion ()
+      (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+            '(flex)))
     :hook (((c++-mode c-mode rust-mode js-mode web-mode css-mode) . lsp-deferred)
-           (lsp-mode . lsp-enable-which-key-integration))
+           (lsp-mode . lsp-enable-which-key-integration)
+           (lsp-completion-mode . my/lsp-mode-setup-completion))
     :config
     (add-to-list 'lsp-language-id-configuration
                  '(web-mode . "html"))
-    ;; (lsp-register-client
-    ;;  (make-lsp-client :new-connection (lsp-stdio-connection '("ember-language-server" "--stdio"))
-    ;;                   :activation-fn (lsp-activate-on "html")
-    ;;                   :server-id 'ember-ls
-    ;;                   :priority -4
-    ;;                   :add-on? t))
 
-    (unbind-key "M-n" lsp-signature-mode-map)
+    (setf (alist-get 'web-mode lsp--formatting-indent-alist) 'web-mode-markup-indent-offset)
+
     :commands lsp lsp-deferred)
 #+end_src
 *** 
