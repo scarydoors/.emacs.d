@@ -44,12 +44,6 @@
       tool-bar-mode nil
       scroll-bar-mode nil)
 
-(setq window-divider-default-places t
-      window-divider-default-bottom-width 1
-      window-divider-default-right-width 1)
-
-(add-hook 'emacs-startup-hook #'window-divider-mode)
-
 (add-hook 'window-setup-hook
           (lambda ()
             (setq-default inhibit-redisplay nil

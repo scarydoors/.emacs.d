@@ -9,6 +9,7 @@
   (setq use-package-always-ensure t)
 #+end_src
 * Org
+** General Configuration
 #+begin_src emacs-lisp
   (setq org-hide-emphasis-markers t
         org-startup-indented t
@@ -16,12 +17,28 @@
         org-pretty-entities t
         org-fontify-whole-heading-line t
         org-fontify-done-headline t
-        org-fontify-quote-and-verse-blocks t)
+        org-ellipsis " ⬎ "
+        org-fontify-quote-and-verse-blocks t
+        org-hidden-keywords '(title))
+  ; add margins on both sides
+  (add-hook 'org-mode-hook #'(lambda ()
+                               (setq left-margin-width 2
+                                     right-margin-width 2)
+                               (set-window-buffer nil (current-buffer))))
 #+end_src
 ** Org Superstar
 #+begin_src emacs-lisp
   (use-package org-superstar
-    :hook (org-mode . org-superstar-mode))
+    :hook (org-mode . org-superstar-mode)
+    :config
+    (set-face-attribute 'org-level-3 nil :inherit 'org-level-8 :height 1.2) 
+    (set-face-attribute 'org-level-2 nil :inherit 'org-level-8 :height 1.3) 
+    (set-face-attribute 'org-level-1 nil :inherit 'org-level-8 :height 1.6)
+
+    (set-face-attribute 'org-document-title nil
+                        :height 2.074
+                        :foreground 'unspecified
+                        :inherit 'org-level-8))
 #+end_src
 ** Mixed Pitches in Org Mode
 #+begin_src emacs-lisp
@@ -31,6 +48,21 @@
     (setq mixed-pitch-fixed-pitch-faces
           '(org-block org-block-begin-line org-block-end-line org-code org-document-info-keyword org-meta-line org-table org-verbatim)))
 
+#+end_src
+** Org Roam
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :custom
+    (org-roam-directory "~/roam/")
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n g" . org-roam-graph)
+           ("C-c n i" . org-roam-node-insert)
+           ("C-c n c" . org-roam-capture)
+           ("C-c n j" . org-roam-dailies-capture-today))
+    :config
+    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode))
 #+end_src
 * General Configuration
 ** Better Defaults
@@ -67,7 +99,6 @@
     (set-selection-coding-system 'utf-8)
     (prefer-coding-system 'utf-8)
     (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
-
     (setq require-final-newline nil)
 
     (delete-selection-mode +1)
@@ -100,8 +131,15 @@
 
     (column-number-mode +1)
 
-    (setq initial-major-mode 'org-mode))
+    (setq initial-major-mode 'org-mode)
 
+    ;; goodbye window dividers
+    (window-divider-mode -1))
+
+  ;; hack to enable native fullscreen from startup on yamamoto mac port
+  (add-hook 'after-init-hook #'(lambda ()
+                                 (toggle-frame-fullscreen)
+                                 (toggle-frame-fullscreen)))
 #+end_src
 ** System
 *** Ensure Emacs path variable is same as shell
@@ -127,7 +165,7 @@
     :config
     (setq doom-themes-enable-bold t
           doom-themes-enable-italic t
-          doom-themes-treemacs-theme "doom-colors")
+          doom-themes-treemacs-theme "doom-atom")
     (doom-themes-org-config)
     (doom-themes-treemacs-config))
 #+end_src
@@ -144,10 +182,20 @@
 
 #+begin_src emacs-lisp
   (use-package ef-themes
-    :demand t
-    :config
-    (load-theme 'ef-duo-light))
+    :demand t)
 #+end_src
+**** MacOS Theme Hook
+#+begin_src emacs-lisp
+  (defvar light-theme 'ef-duo-light)
+  (defvar dark-theme 'ef-duo-dark)
+  (defun match-current-mac-appearance ()
+    (if (string= (shell-command-to-string "printf %s \"$( osascript -e \'tell application \"System Events\" to tell appearance preferences to return dark mode\' )\"") "true")
+        (load-theme dark-theme t)
+      (load-theme light-theme t)))
+  (add-hook 'after-init-hook #'match-current-mac-appearance)
+  (add-hook 'mac-effective-appearance-change-hook #'match-current-mac-appearance)
+#+end_src
+
 *** Tab Bar
 #+begin_src emacs-lisp :tangle no
   (use-package centaur-tabs
@@ -157,22 +205,23 @@
 *** Fonts
 #+begin_src emacs-lisp
   (set-face-attribute 'default nil
-                      :family "Hack"
-                      :height 160)
-  (set-face-attribute 'variable-pitch nil
-                      :family "Source Sans Pro"
+                      :family "Iosevka"
                       :weight 'normal
-                      :height 160)
-  (defvar after-load-theme-hook nil)
-  (defadvice load-theme (after run-after-load-theme-hook activate)
-    (run-hooks 'after-load-theme-hook))
+                      :height 170)
+  (set-face-attribute 'variable-pitch nil
+                      :family "Overpass"
+                      :weight 'normal
+                      :height 150)
+  ;; (defvar after-load-theme-hook nil)
+  ;; (defadvice load-theme (after run-after-load-theme-hook activate)
+  ;;   (run-hooks 'after-load-theme-hook))
 
-  (defun mode-bar-variable-pitch ()
-    (set-face-attribute 'mode-line nil :inherit 'variable-pitch)
-    (set-face-attribute 'mode-line-inactive nil :inherit 'variable-pitch))
-  (mode-bar-variable-pitch)
+  ;; (defun mode-bar-variable-pitch ()
+  ;;   (set-face-attribute 'mode-line nil :inherit 'variable-pitch)
+  ;;   (set-face-attribute 'mode-line-inactive nil :inherit 'variable-pitch))
+  ;; (mode-bar-variable-pitch)
 
-  (add-hook 'after-load-theme-hook #'mode-bar-variable-pitch)
+  ;; (add-hook 'after-load-theme-hook #'mode-bar-variable-pitch)
 #+end_src
 *** Modeline
 **** Indicators
@@ -185,11 +234,12 @@
   (use-package doom-modeline
     :hook (after-init . doom-modeline-mode)
     :config
-    (setq doom-modeline-height 40
+    (setq doom-modeline-height 0
           doom-modeline-mu4e t
+          doom-modeline-bar-width 4
           doom-modeline-time-icon nil
           doom-modeline-window-width-limit nil
-          all-the-icons-scale-factor 1.1))
+          all-the-icons-scale-factor 1.2))
 #+end_src
 **** =anzu=
 #+begin_src emacs-lisp
@@ -244,14 +294,24 @@
     :config
     (treemacs-follow-mode +1)
     (treemacs-filewatch-mode +1)
-    (treemacs-fringe-indicator-mode 'always))
+    (treemacs-fringe-indicator-mode 'always)
+    ;; treemacs margin
+    (add-hook 'treemacs-mode-hook #'(lambda ()
+                                 (setq left-margin-width 1)
+                                 (set-window-buffer nil (current-buffer)))))
 
   (use-package treemacs-all-the-icons
     :after treemacs
     :demand t
     :config
-    (treemacs-load-theme "all-the-icons"))
+    (treemacs-load-theme "all-the-icons")
+    (set-face-attribute 'treemacs-root-face nil
+                        :underline nil
+                        :inherit '(treemacs-all-the-icons-root-face variable-pitch))
+    (set-face-attribute 'treemacs-all-the-icons-file-face nil
+                        :slant 'normal))
 #+end_src
+
 ** Register
 #+begin_src emacs-lisp
   (set-register ?C '(file . "~/.emacs.d/config.org"))
@@ -272,6 +332,12 @@
 #+begin_src emacs-lisp
   (use-package forge
     :after magit)
+#+end_src
+*** Git Timemachine
+#+begin_src emacs-lisp
+  (use-package git-timemachine
+    :straight (git-timemachine :type git :host github :repo "emacsmirror/git-timemachine")
+    :bind ("C-c g" . git-timemachine-toggle))
 #+end_src
 ** Project Management
 #+begin_src emacs-lisp
@@ -711,6 +777,7 @@
     (setq web-mode-enable-current-column-highlight t)   
     (setq web-mode-script-padding 2)
     (setq web-mode-style-padding 2)
+    (setq web-mode-enable-auto-indentation nil)
     (setq web-mode-comment-style 2)
     (setq web-mode-code-indent-offset 2)
     (setq web-mode-markup-indent-offset 2)
