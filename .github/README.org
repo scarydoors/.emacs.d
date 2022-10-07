@@ -28,17 +28,24 @@
 #+end_src
 ** Org Superstar
 #+begin_src emacs-lisp
+  (defvar after-load-theme-hook nil)
+  (defadvice load-theme (after run-after-load-theme-hook activate)
+    (run-hooks 'after-load-theme-hook))
+
   (use-package org-superstar
     :hook (org-mode . org-superstar-mode)
     :config
-    (set-face-attribute 'org-level-3 nil :inherit 'org-level-8 :height 1.2) 
-    (set-face-attribute 'org-level-2 nil :inherit 'org-level-8 :height 1.3) 
-    (set-face-attribute 'org-level-1 nil :inherit 'org-level-8 :height 1.6)
+    (defun set-org-face-level-heights ()
+      (set-face-attribute 'org-level-3 nil :inherit 'org-level-8 :height 1.2) 
+      (set-face-attribute 'org-level-2 nil :inherit 'org-level-8 :height 1.3) 
+      (set-face-attribute 'org-level-1 nil :inherit 'org-level-8 :height 1.6)
 
-    (set-face-attribute 'org-document-title nil
-                        :height 2.074
-                        :foreground 'unspecified
-                        :inherit 'org-level-8))
+      (set-face-attribute 'org-document-title nil
+                          :height 2.074
+                          :foreground 'unspecified
+                          :inherit 'org-level-8))
+    (set-org-face-level-heights)
+    (add-hook 'after-load-theme-hook #'set-org-face-level-heights))
 #+end_src
 ** Mixed Pitches in Org Mode
 #+begin_src emacs-lisp
@@ -212,16 +219,6 @@
                       :family "Overpass"
                       :weight 'normal
                       :height 150)
-  ;; (defvar after-load-theme-hook nil)
-  ;; (defadvice load-theme (after run-after-load-theme-hook activate)
-  ;;   (run-hooks 'after-load-theme-hook))
-
-  ;; (defun mode-bar-variable-pitch ()
-  ;;   (set-face-attribute 'mode-line nil :inherit 'variable-pitch)
-  ;;   (set-face-attribute 'mode-line-inactive nil :inherit 'variable-pitch))
-  ;; (mode-bar-variable-pitch)
-
-  ;; (add-hook 'after-load-theme-hook #'mode-bar-variable-pitch)
 #+end_src
 *** Modeline
 **** Indicators
