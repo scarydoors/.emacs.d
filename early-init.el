@@ -2,8 +2,7 @@
 
 ;; Copyright (C) 2022  Alan Strauhs
 
-;; Author: Alan Strauhs(setq package-enable-at-startup nil) <sundog@doors>
-;; Keywords: 
+;; Author: Alan Strauhs <scarydoorsyeah@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,6 +22,9 @@
 ;; This file runs before init.el.
 
 ;;; Code:
+
+;; needed for straight.el
+(setq package-enable-at-startup nil)
 
 (setq gc-cons-threshold most-positive-fixnum)
 (let ((old-file-name-handler-alist file-name-handler-alist))

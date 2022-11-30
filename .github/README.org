@@ -1,75 +1,67 @@
-#+TITLE: scarydoors' Emacs Configuration
+#+TITLE:Scarydoors Emacs Configuration
 #+PROPERTY: header-args :tangle yes
+#+TOC: listings
+* Introduction
+This is my [[https://en.wikipedia.org/wiki/Literate_programming][literate]] Emacs configuration. This leverages the feature-rich
+=org-mode= package which allows Emacs to tangle a =.org= file into an Emacs Lisp file.
+
+I normally use Emacs for development work, and occasionally some text processing
+work, I'm also trying to start using Emacs as a means of knowledge management.
+
+I mainly use Emacs on my Mac laptop and my Linux machine. I prefer the [[https://bitbucket.org/mituharu/emacs-mac/][Mituharu
+Emacs Port]] because it integrates quite well with MacOS works well out of the box.
+
+** Why Emacs
+Initially, I was using [[https://code.visualstudio.com/][Visual Studio Code]] for programming and I was happy with
+it for a very long time but I started to get fed up with needing to switch to my
+using my mouse for a lot of tasks and it wasn't as extensible as other
+editors out there. Then, I came across [[https://www.vim.org/][Vim]]/[[https://neovim.io/][Neovim]].
+
+So I opted for Neovim, and eventually learned the plethora of key bindings and
+became proficient in using them, all was well. However, configuring Neovim was
+when things started to get rocky because VimScript was difficult to use and
+documentation wasn't very discoverable inside the editor and amidst this I heard
+about Emacs.
+
+Looking at Emacs and seeing that it can do many things other than text editing
+it appealed to me because I wouldn't have to leave the environment for many
+things, and it had a good ecosystem of packages such as =magit=, =org=, and
+even =evil= which helped me with transitioning from Vim to Emacs keeping the
+same key bindings. Initially when learning Emacs it was daunting because it
+didn't look friendly but I followed the tutorial and got up to speed with it and
+ended up with a configuration using =evil-mode=.
+
+Emacs is highly extensible similarly to Vim and self-documenting (=C-h= had
+everything I needed). Emacs had a built-in Emacs Lisp tutorial which helped me
+get familiar with the language and helped me write my configuration. Almost
+every aspect of Emacs is customizable which lets you adapt it to your needs
+instead of adapting to the text editors limitations (VSCode is the main culprit
+here).
+
+I no longer use =evil-mode= because I wanted better compatibility with key
+bindings across Emacs and switched to the default key chord system, and with a
+little bit of tweaking and some third-party packages editing with Emacs is
+almost as fast as editing with Vim key bindings.
+
+* My initialization files
+** =early-init.el=
+This file runs a lot earlier than =init.el=. It sets up a couple things for me,
+disabling unneeded GUI elements and some tweaks that I stole from Doom Emacs.
+#+INCLUDE: "./early-init.el" src emacs-lisp
+** =init.el=
+This file bootstraps the package of my choice, [[https://github.com/radian-software/straight.el][straight]]. I use straight because
+it allows me to have a reproducible configuration and allows me to install
+packages from other places such as Git repositories.
+#+INCLUDE: "./init.el" src emacs-lisp
 * Package Management
 ** =use-package=
+This package simplifies a lot of aspects when it comes to Emacs configuration
+such as deferred loading, key bindings, and improves maintainability.
 #+begin_src emacs-lisp
   (straight-use-package 'use-package)
   (setq straight-use-package-by-default t)
   (setq use-package-always-defer t)
   (setq use-package-always-ensure t)
-#+end_src
-* Org
-** General Configuration
-#+begin_src emacs-lisp
-  (setq org-hide-emphasis-markers t
-        org-startup-indented t
-        org-src-tab-acts-natively t
-        org-pretty-entities t
-        org-fontify-whole-heading-line t
-        org-fontify-done-headline t
-        org-ellipsis " ⬎ "
-        org-fontify-quote-and-verse-blocks t
-        org-hidden-keywords '(title))
-  ; add margins on both sides
-  (add-hook 'org-mode-hook #'(lambda ()
-                               (setq left-margin-width 2
-                                     right-margin-width 2)
-                               (set-window-buffer nil (current-buffer))))
-#+end_src
-** Org Superstar
-#+begin_src emacs-lisp
-  (defvar after-load-theme-hook nil)
-  (defadvice load-theme (after run-after-load-theme-hook activate)
-    (run-hooks 'after-load-theme-hook))
-
-  (use-package org-superstar
-    :hook (org-mode . org-superstar-mode)
-    :config
-    (defun set-org-face-level-heights ()
-      (set-face-attribute 'org-level-3 nil :inherit 'org-level-8 :height 1.2) 
-      (set-face-attribute 'org-level-2 nil :inherit 'org-level-8 :height 1.3) 
-      (set-face-attribute 'org-level-1 nil :inherit 'org-level-8 :height 1.6)
-
-      (set-face-attribute 'org-document-title nil
-                          :height 2.074
-                          :foreground 'unspecified
-                          :inherit 'org-level-8))
-    (set-org-face-level-heights)
-    (add-hook 'after-load-theme-hook #'set-org-face-level-heights))
-#+end_src
-** Mixed Pitches in Org Mode
-#+begin_src emacs-lisp
-  (use-package mixed-pitch
-    :hook (org-mode . mixed-pitch-mode)
-    :config
-    (setq mixed-pitch-fixed-pitch-faces
-          '(org-block org-block-begin-line org-block-end-line org-code org-document-info-keyword org-meta-line org-table org-verbatim)))
-
-#+end_src
-** Org Roam
-#+begin_src emacs-lisp
-  (use-package org-roam
-    :custom
-    (org-roam-directory "~/roam/")
-    :bind (("C-c n l" . org-roam-buffer-toggle)
-           ("C-c n f" . org-roam-node-find)
-           ("C-c n g" . org-roam-graph)
-           ("C-c n i" . org-roam-node-insert)
-           ("C-c n c" . org-roam-capture)
-           ("C-c n j" . org-roam-dailies-capture-today))
-    :config
-    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-    (org-roam-db-autosync-mode))
 #+end_src
 * General Configuration
 ** Better Defaults
@@ -87,11 +79,13 @@
           use-dialog-box nil
           use-short-answers t)
 
+    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+
     (setq load-prefer-newer t)
 
     ;; split vertically by default 
     (setq split-width-threshold 100
-          split-height-threshold nil)
+          split-height-threshold 60)
 
     (setq user-full-name "Alan Strauhs"
           user-mail-address "scarydoorsyeah@gmail.com")
@@ -135,13 +129,16 @@
 
     ;; setup line numbers
     (setq-default display-line-numbers-width 4)
-
+    
     (column-number-mode +1)
 
     (setq initial-major-mode 'org-mode)
 
     ;; goodbye window dividers
-    (window-divider-mode -1))
+    (window-divider-mode -1)
+
+
+    (setq frame-title-format nil))
 
   ;; hack to enable native fullscreen from startup on yamamoto mac port
   (add-hook 'after-init-hook #'(lambda ()
@@ -172,7 +169,7 @@
     :config
     (setq doom-themes-enable-bold t
           doom-themes-enable-italic t
-          doom-themes-treemacs-theme "doom-atom")
+          doom-themes-treemacs-theme "doom-colors")
     (doom-themes-org-config)
     (doom-themes-treemacs-config))
 #+end_src
@@ -201,13 +198,6 @@
       (load-theme light-theme t)))
   (add-hook 'after-init-hook #'match-current-mac-appearance)
   (add-hook 'mac-effective-appearance-change-hook #'match-current-mac-appearance)
-#+end_src
-
-*** Tab Bar
-#+begin_src emacs-lisp :tangle no
-  (use-package centaur-tabs
-    :demand t
-    :config (centaur-tabs-mode +1))
 #+end_src
 *** Fonts
 #+begin_src emacs-lisp
@@ -252,11 +242,6 @@
     :config
     (which-key-mode +1))
 #+end_src
-*** =solaire-mode=
-#+begin_src emacs-lisp
-  (use-package solaire-mode
-    :hook (after-init . solaire-global-mode))
-#+end_src
 *** =all-the-icons=
 #+begin_src emacs-lisp
   (use-package all-the-icons
@@ -297,28 +282,29 @@
                                  (setq left-margin-width 1)
                                  (set-window-buffer nil (current-buffer)))))
 
-  (use-package treemacs-all-the-icons
-    :after treemacs
-    :demand t
-    :config
-    (treemacs-load-theme "all-the-icons")
-    (set-face-attribute 'treemacs-root-face nil
-                        :underline nil
-                        :inherit '(treemacs-all-the-icons-root-face variable-pitch))
-    (set-face-attribute 'treemacs-all-the-icons-file-face nil
-                        :slant 'normal))
+  ;; (use-package treemacs-all-the-icons
+  ;;   :after treemacs
+  ;;   :demand t
+  ;;   :config
+  ;;   (treemacs-load-theme "all-the-icons")
+  ;;   (set-face-attribute 'treemacs-root-face nil
+  ;;                       :underline nil
+  ;;                       :inherit '(treemacs-all-the-icons-root-face variable-pitch))
+  ;;   (set-face-attribute 'treemacs-all-the-icons-file-face nil
+  ;;                       :slant 'normal))
 #+end_src
-
+*** =imenu-list=
+#+begin_src emacs-lisp
+  (use-package imenu-list
+    :config
+    (setq imenu-list-position 'left
+          imenu-list-size 36))
+  (use-package svg-lib)
+#+end_src
 ** Register
 #+begin_src emacs-lisp
   (set-register ?C '(file . "~/.emacs.d/config.org"))
-#+end_src
-** Dirvish
-#+begin_src emacs-lisp
-  (use-package dirvish
-    :defer 0.1
-    :config
-    (dirvish-override-dired-mode +1))
+  (set-register ?F '(file . "~/finance.ledger"))
 #+end_src
 ** =magit=
 #+begin_src emacs-lisp
@@ -465,6 +451,7 @@
                 ("C-i" . marginalia-cycle-annotators)))
 
   (use-package all-the-icons-completion
+    :straight (all-the-icons-completion :type git :repo "MintSoup/all-the-icons-completion")
     :after (marginalia all-the-icons)
     :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
     :init
@@ -582,36 +569,15 @@
 
 
 #+end_src
-** Workspaces
-#+begin_src emacs-lisp :tangle no
-  (use-package bufler
-    :hook (after-init . bufler-mode)
-    :bind ("C-x C-b" . bufler))
-
-
-  (defun my--source ()
-                (let* ((bufler-vc-state nil)
-                       (group-path (unless current-prefix-arg
-                                     (frame-parameter nil 'bufler-workspace-path))))
-                  (pcase current-prefix-arg
-                    ((or `nil '(4) '(16))
-                     (bufler-buffer-alist-at
-                      group-path :filter-fns bufler-workspace-switch-buffer-filter-fns))
-                    (_ (bufler-buffer-alist-at nil)))))
-
-
-  (defvar bufler-consult-source
-    (list :name "Bufler"
-          :narrow ?s
-          :category 'buffer
-          :state #'consult--buffer-state
-          :history 'buffer-name-history
-          :default t
-          :items
-          #'(lambda ()
-              (mapcar #'(lambda (item) (buffer-name (cdr item))) (my--source)))))
-
-  (add-to-list 'consult-buffer-sources bufler-consult-source)
+** PDF Viewing
+#+begin_src emacs-lisp
+  (use-package pdf-tools
+    :mode ("\\.pdf\\'" . pdf-view-mode)
+    :config
+    (setq-default pdf-view-display-size 'fit-page)
+    (setq pdf-view-use-scaling t)
+    (pdf-tools-install :no-query)
+    (require 'pdf-occur))
 #+end_src
 ** Emacs as a Terminal Multiplexer
 #+begin_src emacs-lisp
@@ -638,12 +604,82 @@
                      (my/multi-vterm-buffer-names))))
     (defun my/multi-vterm-switch-buffer ()
       (interactive)
-      (consult-buffer (list multi-vterm-buffer-source)))
+      (if (length= multi-vterm-buffer-list 0)
+          (multi-vterm)
+        (consult-buffer (list multi-vterm-buffer-source))))
 
     (bind-key (kbd "C-c t s") #'my/multi-vterm-switch-buffer))
 
 
 
+#+end_src
+** Ledger Mode
+#+begin_src emacs-lisp :tangle no
+  (use-package ledger-mode
+    :demand t)
+#+end_src
+* Org Mode
+** General Configuration
+#+begin_src emacs-lisp
+  (setq org-hide-emphasis-markers t
+        org-startup-indented t
+        org-src-tab-acts-natively t
+        org-pretty-entities t
+        org-fontify-whole-heading-line t
+        org-fontify-done-headline t
+        org-ellipsis " ￬ "
+        org-fontify-quote-and-verse-blocks t
+        org-hidden-keywords '(title))
+  ; add margins on both sides
+  (add-hook 'org-mode-hook #'(lambda ()
+                               (setq left-margin-width 2
+                                     right-margin-width 2)
+                               (set-window-buffer nil (current-buffer))))
+#+end_src
+** Org Superstar
+#+begin_src emacs-lisp
+  (defvar after-load-theme-hook nil)
+  (defadvice load-theme (after run-after-load-theme-hook activate)
+    (run-hooks 'after-load-theme-hook))
+
+  (use-package org-superstar
+    :hook (org-mode . org-superstar-mode)
+    :config
+    (defun set-org-face-level-heights ()
+      (set-face-attribute 'org-level-3 nil :inherit 'org-level-8 :height 1.2) 
+      (set-face-attribute 'org-level-2 nil :inherit 'org-level-8 :height 1.3) 
+      (set-face-attribute 'org-level-1 nil :inherit 'org-level-8 :height 1.6)
+
+      (set-face-attribute 'org-document-title nil
+                          :height 2.074
+                          :foreground 'unspecified
+                          :inherit 'org-level-8))
+    (set-org-face-level-heights)
+    (add-hook 'after-load-theme-hook #'set-org-face-level-heights))
+#+end_src
+** Mixed Pitches in Org Mode
+#+begin_src emacs-lisp
+  (use-package mixed-pitch
+    :hook (org-mode . mixed-pitch-mode)
+    :config
+    (setq mixed-pitch-fixed-pitch-faces
+          '(org-block org-block-begin-line org-block-end-line org-code org-document-info-keyword org-meta-line org-table org-verbatim)))
+
+#+end_src
+** Org Roam
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :custom
+    (org-roam-directory "~/roam/")
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n g" . org-roam-graph)
+           ("C-c n i" . org-roam-node-insert)
+           ("C-c n c" . org-roam-capture)
+           ("C-c n j" . org-roam-dailies-capture-today))
+    :config
+    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode))
 #+end_src
 * Editing Packages
 ** =expand-region=
@@ -698,6 +734,14 @@
     :config
     (yas-global-mode +1))
 #+end_src
+** Drag Stuff
+#+begin_src emacs-lisp
+  (use-package drag-stuff
+    :hook ((text-mode prog-mode) . drag-stuff-global-mode)
+    :config
+    (drag-stuff-define-keys))
+#+end_src
+
 * Programming
 ** LSP Configuration
 #+begin_src emacs-lisp
@@ -711,7 +755,7 @@
     (defun my/lsp-mode-setup-completion ()
       (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
             '(flex)))
-    :hook (((c++-mode c-mode rust-mode js-mode web-mode css-mode) . lsp-deferred)
+    :hook (((c++-mode elixir-mode c-mode rust-mode js-mode web-mode css-mode typescript-mode) . lsp-deferred)
            (lsp-mode . lsp-enable-which-key-integration)
            (lsp-completion-mode . my/lsp-mode-setup-completion))
     :config
@@ -722,7 +766,24 @@
 
     :commands lsp lsp-deferred)
 #+end_src
-*** 
+
+** Treesitter
+#+begin_src emacs-lisp
+  (use-package tree-sitter
+    :demand t
+    :config
+    (global-tree-sitter-mode)
+    (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+  (use-package tree-sitter-langs
+    :demand t
+    :after tree-sitter)
+#+end_src
+
+** Elixir
+#+begin_src emacs-lisp
+  (use-package elixir-mode)
+#+end_src
 ** JSON
 #+begin_src emacs-lisp
   (use-package json-mode)
@@ -752,6 +813,19 @@
   (use-package add-node-modules-path
     :hook (((js2-mode rjsx-mode) . add-node-modules-path)))
 #+end_src
+** Typescript
+#+begin_src emacs-lisp
+  (use-package typescript-mode
+    :demand t
+    :after tree-sitter
+    :config
+    (setq typescript-indent-level 2)
+    (define-derived-mode typescriptreact-mode typescript-mode
+      "Typescript TSX")
+
+    (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+    (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+#+end_src
 ** Web
 #+begin_src emacs-lisp
   (use-package web-mode
@@ -765,7 +839,8 @@
      ("\\.djhtml\\'" . web-mode)         
      ("\\.jst.ejs\\'" . web-mode)        
      ("\\.html?\\'" . web-mode)
-     ("\\.hbs\\'" . web-mode))
+     ("\\.hbs\\'" . web-mode)
+     ("\\.heex\\'" . web-mode))
 
     :init
     (setq web-mode-enable-block-face t)
@@ -871,3 +946,8 @@
   (global-set-key (kbd "M-o") #'sd-hydra-window/body)
 
 #+end_src
+
+;; Local Variables:
+;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t)
+;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t)
+;; End:
