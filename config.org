@@ -10,39 +10,6 @@ work, I'm also trying to start using Emacs as a means of knowledge management.
 
 I mainly use Emacs on my Mac laptop and my Linux machine. I prefer the [[https://bitbucket.org/mituharu/emacs-mac/][Mituharu
 Emacs Port]] because it integrates quite well with MacOS works well out of the box.
-
-** Why Emacs
-Initially, I was using [[https://code.visualstudio.com/][Visual Studio Code]] for programming and I was happy with
-it for a very long time but I started to get fed up with needing to switch to my
-using my mouse for a lot of tasks and it wasn't as extensible as other
-editors out there. Then, I came across [[https://www.vim.org/][Vim]]/[[https://neovim.io/][Neovim]].
-
-So I opted for Neovim, and eventually learned the plethora of key bindings and
-became proficient in using them, all was well. However, configuring Neovim was
-when things started to get rocky because VimScript was difficult to use and
-documentation wasn't very discoverable inside the editor and amidst this I heard
-about Emacs.
-
-Looking at Emacs and seeing that it can do many things other than text editing
-it appealed to me because I wouldn't have to leave the environment for many
-things, and it had a good ecosystem of packages such as =magit=, =org=, and
-even =evil= which helped me with transitioning from Vim to Emacs keeping the
-same key bindings. Initially when learning Emacs it was daunting because it
-didn't look friendly but I followed the tutorial and got up to speed with it and
-ended up with a configuration using =evil-mode=.
-
-Emacs is highly extensible similarly to Vim and self-documenting (=C-h= had
-everything I needed). Emacs had a built-in Emacs Lisp tutorial which helped me
-get familiar with the language and helped me write my configuration. Almost
-every aspect of Emacs is customizable which lets you adapt it to your needs
-instead of adapting to the text editors limitations (VSCode is the main culprit
-here).
-
-I no longer use =evil-mode= because I wanted better compatibility with key
-bindings across Emacs and switched to the default key chord system, and with a
-little bit of tweaking and some third-party packages editing with Emacs is
-almost as fast as editing with Vim key bindings.
-
 * My initialization files
 ** =early-init.el=
 This file runs a lot earlier than =init.el=. It sets up a couple things for me,
@@ -440,6 +407,21 @@ such as deferred loading, key bindings, and improves maintainability.
            ("C-x C-d" . consult-dir)
            ("C-x C-j" . consult-dir-jump-file)))
 #+end_src
+**** Ripgrep ignore dir
+#+begin_src emacs-lisp
+  (defun consult-rg-glob (globs)
+    (interactive "sEnter globs: ")
+    (setq args-with-glob
+          (concat consult-ripgrep-args " -g \"" globs "\""))
+    (let (consult-ripgrep-args args-with-glob)
+      (consult-ripgrep)))
+
+  
+
+
+
+
+#+end_src
 *** Marginalia
 #+begin_src emacs-lisp
   (use-package marginalia
@@ -755,7 +737,7 @@ such as deferred loading, key bindings, and improves maintainability.
     (defun my/lsp-mode-setup-completion ()
       (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
             '(flex)))
-    :hook (((c++-mode elixir-mode c-mode rust-mode js-mode web-mode css-mode typescript-mode) . lsp-deferred)
+    :hook (((elm-mode c++-mode elixir-mode c-mode rust-mode js-mode web-mode css-mode typescript-mode) . lsp-deferred)
            (lsp-mode . lsp-enable-which-key-integration)
            (lsp-completion-mode . my/lsp-mode-setup-completion))
     :config
@@ -828,33 +810,34 @@ such as deferred loading, key bindings, and improves maintainability.
 #+end_src
 ** Web
 #+begin_src emacs-lisp
-  (use-package web-mode
-    :mode
-    (("\\.phtml\\'" . web-mode)
-     ("\\.tpl\\.php\\'" . web-mode)      
-     ("\\.jsp\\'" . web-mode)            
-     ("\\.as[cp]x\\'" . web-mode)        
-     ("\\.erb\\'" . web-mode)            
-     ("\\.mustache\\'" . web-mode)       
-     ("\\.djhtml\\'" . web-mode)         
-     ("\\.jst.ejs\\'" . web-mode)        
-     ("\\.html?\\'" . web-mode)
-     ("\\.hbs\\'" . web-mode)
-     ("\\.heex\\'" . web-mode))
+    (use-package web-mode
+      :mode
+      (("\\.phtml\\'" . web-mode)
+       ("\\.tpl\\.php\\'" . web-mode)      
+       ("\\.jsp\\'" . web-mode)            
+       ("\\.as[cp]x\\'" . web-mode)        
+       ("\\.erb\\'" . web-mode)            
+       ("\\.mustache\\'" . web-mode)       
+       ("\\.djhtml\\'" . web-mode)         
+       ("\\.jst.ejs\\'" . web-mode)        
+       ("\\.html?\\'" . web-mode)
+       ("\\.hbs\\'" . web-mode)
+       ("\\.heex\\'" . web-mode)
+       ("\\html.eex\\'" . web-mode))
 
-    :init
-    (setq web-mode-enable-block-face t)
-    (setq web-mode-enable-comment-keywords t)
-    (setq web-mode-enable-current-element-highlight t)
-    (setq web-mode-enable-current-column-highlight t)   
-    (setq web-mode-script-padding 2)
-    (setq web-mode-style-padding 2)
-    (setq web-mode-enable-auto-indentation nil)
-    (setq web-mode-comment-style 2)
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-markup-indent-offset 2)
-    (setq css-indent-level 2)
-    (setq css-indent-offset 2))
+      :init
+      (setq web-mode-enable-block-face t)
+      (setq web-mode-enable-comment-keywords t)
+      (setq web-mode-enable-current-element-highlight t)
+      (setq web-mode-enable-current-column-highlight t)   
+      (setq web-mode-script-padding 2)
+      (setq web-mode-style-padding 2)
+      (setq web-mode-enable-auto-indentation nil)
+      (setq web-mode-comment-style 2)
+      (setq web-mode-code-indent-offset 2)
+      (setq web-mode-markup-indent-offset 2)
+      (setq css-indent-level 2)
+      (setq css-indent-offset 2))
 #+end_src
 ** C/C++
 #+begin_src emacs-lisp
@@ -898,6 +881,10 @@ such as deferred loading, key bindings, and improves maintainability.
 
     (when (listp c-default-style)
       (setf (alist-get 'other c-default-style) "scary")))
+#+end_src
+** ELM!!!!
+#+begin_src emacs-lisp
+  (use-package elm-mode)
 #+end_src
 
 * Hydras
